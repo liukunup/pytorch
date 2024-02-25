@@ -1,2 +1,1 @@
-# pytorch
-PyTorch Docker Image &amp; Deploy on Kubernetes Cluster
+# PyTorch Docker Image &amp; Deploy on Kubernetes Cluster
