@@ -1,28 +1,28 @@
 # 基础镜像
-ARG REGISTRY=nvcr.io
-ARG OWNER=nvidia
-ARG BASE_CONTAINER=$REGISTRY/$OWNER/cuda
-ARG VERSION=12.0.1-cudnn8-runtime-ubuntu22.04
+ARG REGISTRY=quay.io
+ARG OWNER=jupyter
+ARG BASE_CONTAINER=$REGISTRY/$OWNER/scipy-notebook
+ARG VERSION=latest
 FROM $BASE_CONTAINER:$VERSION
 
 # 作者信息
-LABEL authors="LiuKun <liukunup@outlook.com>"
+LABEL maintainer="LiuKun <liukunup@outlook.com>"
 
-# 设置为非交互(即无需等待用户输入的提示)
-ENV DEBIAN_FRONTEND=noninteractive
+# Fix: https://github.com/hadolint/hadolint/wiki/DL4006
+# Fix: https://github.com/koalaman/shellcheck/wiki/SC3014
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# 系统更新以及安装软件
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    vim \
-    wget \
-    git \
-    curl \
-    unzip && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install PyTorch with pip (https://pytorch.org/get-started/locally/)
+# Install Tensorflow with pip
+# hadolint ignore=DL3013
+RUN pip install --no-cache-dir --extra-index-url=https://pypi.nvidia.com --index-url 'https://download.pytorch.org/whl/cu116' \
+    'torch' \
+    'torchvision' \
+    'torchaudio'  && \
+    pip install --no-cache-dir tensorflow && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
 
-# 默认的入口程序脚本
-COPY images/entrypoint.sh /
-
-# 默认入口程序
-ENTRYPOINT ["/entrypoint.sh"]
+# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/docker-specialized.html#dockerfiles
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
