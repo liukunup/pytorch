@@ -19,7 +19,6 @@ RUN pip install --no-cache-dir --extra-index-url=https://pypi.nvidia.com --index
     'torch' \
     'torchvision' \
     'torchaudio'  && \
-    pip install --no-cache-dir tensorflow && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
